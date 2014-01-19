@@ -26,8 +26,6 @@
         document.addEventListener("menubutton", onMenuKeyDown, false);
         FastClick.attach(document.body);
         
-
-        //cambio prueba
     
     }
 
@@ -53,14 +51,34 @@
     function crearTabla(tx) {
         //Si es que queremos borrar la tabla antes de partir 
         tx.executeSql('DROP TABLE IF EXISTS TablaGlosa');       
-         tx.executeSql('CREATE TABLE IF NOT EXISTS TablaGlosa (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, glosa TEXT)');
+        tx.executeSql('CREATE TABLE IF NOT EXISTS TablaGlosa (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, glosa TEXT)');
          //Podemos insertar un dato de prueba, o por ejemplo llenar los combos...
-         tx.executeSql('INSERT INTO TablaGlosa (glosa) VALUES ("rojo"),("verde"),("amarillo"),("azul")');    
+         tx.executeSql('INSERT INTO TablaGlosa (glosa) VALUES ("rojo"),("verde"),("amarillo"),("azul")');  
+         /*
+        //Tablas Finales
+        //Primero se elimina la infor actual (Borrar cuando ya esté la versión final)
+        tx.executeSql('DROP TABLE IF EXISTS TBL_AUTOMOVIL');
+        tx.executeSql('DROP TABLE IF EXISTS TBL_MULTA');
+        tx.executeSql('DROP TABLE IF EXISTS TBL_LOGIN');
+        tx.executeSql('DROP TABLE IF EXISTS TBL_GENERICA');
+        //Tabla con los datos del automovil
+        tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_AUTOMOVIL(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, MARCA TEXT,MODELO TEXT, PATENTE TEXT, COLOR TEXT, ESTATAL TEXT)');
+        //Tabla con los datos de multas asociados a un determinado automovil
+        tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_MULTA(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ID_AUTO INTEGER, DIRECCION TEXT, FECHA_HORA TEXT, TIPO_MULTA TEXT)');
+        //Tabla Login con datos de usuario
+        tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_LOGIN(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, USUARIO TEXT, PASS TEXT)');
+        //Poblamiento tabla login
+        tx.executeSql('INSERT INTO TBL_LOGIN (USUARIO,PASS) VALUES ("chong","xng"),("matias","mati")');
+        //Tabla con informacion generica para el llenado de los combobox
+        tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_GENERICA(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, TIPO INTEGER, GLOSA TEXT)');
+        //Poblamiento tabla generica
+        tx.executeSql('INSERT INTO TBL_GENERICA (TIPO, GLOSA) VALUES (0,"TOYOTA"),(0,"NISSAN"),(0,"KIA"),(0,"HYUNDAI"),(0,"AUDI"),(0,"SUBARU"),(1,"ROJO"),(1,"AMARILLO"),(1,"BLANCO"),(1,"NEGRO"),(1,"SILVER"),(1,"AZUL"),(2,"Estacionado cerca de Grifo"),(2,"Estacionado frente a Salida Vehículos"),(2,"Estacionado en lugar restringido"),(2,"Estacionado sobre vereda")');
+         */  
     }
 
     
     function onMenuKeyDown() {
-        alert("Acerca de: \n Tarea M��dulo PhoneGap desarrollada por Cristian Chong");
+        alert("Acerca de: \n Tarea Módulo PhoneGap desarrollada por Cristian Chong");
     }
 
 
@@ -181,7 +199,7 @@
                 <p>Debe Ingresar su nombre de usuario<p>
             </div>
             <div data-role="popup" id="popuppass" class="ui-content" data-overlay-theme="a" data-shadow="true">
-                <p>Debe ingresar contrase��a<p>
+                <p>Debe ingresar contraseña<p>
             </div>
             <!--<a data-role="button" data-theme="b" data-transition="flip" href="#ingreso">INGRESAR</a>-->
         </p>        
@@ -203,7 +221,7 @@
 <div data-role="page" id="ingreso">
     <div data-role="content">   
         <p>
-            <center><b><h4>Ingrese Informaci��n del Veh��culo</h4></b></center>
+            <center><b><h4>Ingrese Información del Vehículo</h4></b></center>
             <div data-role="fieldcontain" >
                 <!-- Combo para la MARCA-->
                 <label for="marca" class="select" >Marca:</label>
@@ -221,8 +239,8 @@
                 <select name="color" id="color" data-mini="true">
                    <!--<option value="standard">Standard: 7 day</option>-->
                 </select>
-                <!--Switch para Veh��culo Estatal (default no)-->
-                <label for="vi_est">Veh��culo Estatal:</label>
+                <!--Switch para Vehículo Estatal (default no)-->
+                <label for="vi_est">Vehículo Estatal:</label>
                 <select name="vi_est" id="vi_est" data-role="slider">
                     <option value="off">No</option>
                     <option value="on">Si</option>
@@ -231,9 +249,9 @@
             <div data-role="fieldcontain" >
                 <!--Label Datos Multa-->
                 <u><label for="direccion">Datos Multa:</label></u>
-                <!--Input para Direcci��n-->
+                <!--Input para Dirección-->
                 <label for="direccion">Direccion:</label>
-                <input type="text" name="direccion" id="direccion" value="" placeholder="Ej: Autopista Concepci��n- Talcahuano 7100 " data-mini="true"/>
+                <input type="text" name="direccion" id="direccion" value="" placeholder="Ej: Autopista Concepción- Talcahuano 7100 " data-mini="true"/>
                 <!--datapicker para Fecha (no puede ser menor que la actual)-->
                 <label for="fecha">Fecha:</label>
                 <input type="date" name="fecha" id="fecha" value=""  /> 
@@ -248,14 +266,14 @@
             <button id="limpiar" data-inline="true" data-icon="minus" data-iconpos="top" data-mini="true">Limpiar</button>
             </center>
             <div data-role="popup" id="conf_guardar" class="ui-content" data-overlay-theme="a" data-shadow="true">
-                <p>��Desea Guardar la Informaci��n?<p>
+                <p>¿Desea Guardar la Información?<p>
                 <center>
                     <button id="guardar_pop" data-inline="true" data-mini="true" data-theme="b">Guardar</button>
                     <button id="cancelar_pop_guardar" data-inline="true" data-mini="true">Cancelar</button>
                 </center>
             </div>
             <div data-role="popup" id="conf_limpiar" class="ui-content" data-overlay-theme="a" data-shadow="true">
-                <p>��Limpiar Datos?<p>
+                <p>¿Limpiar Datos?<p>
                 <center>
                     <button id="limpiar_pop" data-inline="true" data-mini="true" data-theme="b">Guardar</button>
                     <button id="cancelar_pop_limpiar" data-inline="true" data-mini="true">Cancelar</button>
@@ -274,7 +292,7 @@
     </div><!-- /content -->
 </div><!-- /page -->
 <!--Fin Pagina multas ingresadas-->
-<!--P��gina de Preferencias-->
+<!--Página de Preferencias-->
 <div data-role="page" id="preferencias">
     <div data-role="content">   
         <p>Menu con las preferencias de usuario</p>      
