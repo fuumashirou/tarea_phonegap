@@ -21,50 +21,46 @@
     //
     function onDeviceReady() {
         var db = window.openDatabase("Database", "1.0", "BDTarea", 200000);
-        //por mientras hasta que matias temrine la clase de la bd
         db.transaction(crearTabla, errorCB, successCB);
         document.addEventListener("menubutton", onMenuKeyDown, false);
         FastClick.attach(document.body);
-        
-    
     }
 
 
-
-    
     //Funciones con mensajes de las llamadas a la BASE
     function errorCB(err) {
         alert("Error procesando SQL: "+err);
     }
 
     function successCB() {
-        alert("Listo!");
+        alert("Base de Datos Cargada");
     }
-   /* function okGuardar() {
-        alert("Registro Almacenado!");
-        $.mobile.changePage("#Lista")
+    function okGuardar() {
+        alert("Multa Ingresada");
     }
-*/
-    // Rellena la base de datos
-    //
     
+
+
+    // Rellena la base de datos    
     function crearTabla(tx) {
         //Si es que queremos borrar la tabla antes de partir 
-        tx.executeSql('DROP TABLE IF EXISTS TablaGlosa');       
-        tx.executeSql('CREATE TABLE IF NOT EXISTS TablaGlosa (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, glosa TEXT)');
+        //tx.executeSql('DROP TABLE IF EXISTS TablaGlosa');       
+        //tx.executeSql('CREATE TABLE IF NOT EXISTS TablaGlosa (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, glosa TEXT)');
          //Podemos insertar un dato de prueba, o por ejemplo llenar los combos...
-         tx.executeSql('INSERT INTO TablaGlosa (glosa) VALUES ("rojo"),("verde"),("amarillo"),("azul")');  
-         /*
+         //tx.executeSql('INSERT INTO TablaGlosa (glosa) VALUES ("rojo"),("verde"),("amarillo"),("azul")');  
+         
         //Tablas Finales
         //Primero se elimina la infor actual (Borrar cuando ya esté la versión final)
-        tx.executeSql('DROP TABLE IF EXISTS TBL_AUTOMOVIL');
+        //tx.executeSql('DROP TABLE IF EXISTS TBL_AUTOMOVIL');
         tx.executeSql('DROP TABLE IF EXISTS TBL_MULTA');
         tx.executeSql('DROP TABLE IF EXISTS TBL_LOGIN');
         tx.executeSql('DROP TABLE IF EXISTS TBL_GENERICA');
         //Tabla con los datos del automovil
-        tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_AUTOMOVIL(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, MARCA TEXT,MODELO TEXT, PATENTE TEXT, COLOR TEXT, ESTATAL TEXT)');
+        //tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_AUTOMOVIL(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, MARCA TEXT,MODELO TEXT, PATENTE TEXT, COLOR TEXT, ESTATAL TEXT)');
         //Tabla con los datos de multas asociados a un determinado automovil
-        tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_MULTA(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ID_AUTO INTEGER, DIRECCION TEXT, FECHA_HORA TEXT, TIPO_MULTA TEXT)');
+        //tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_MULTA(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ID_AUTO INTEGER, DIRECCION TEXT, FECHA_HORA TEXT, TIPO_MULTA TEXT)');
+        //Tabla multa con todos los datos juntos
+        tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_MULTA(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, MARCA TEXT, MODELO TEXT, PATENTE TEXT, COLOR TEXT, ESTATAL TEXT, DIRECCION TEXT, FECHA_HORA TEXT, TIPO_MULTA TEXT)');
         //Tabla Login con datos de usuario
         tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_LOGIN(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, USUARIO TEXT, PASS TEXT)');
         //Poblamiento tabla login
@@ -73,7 +69,7 @@
         tx.executeSql('CREATE TABLE IF NOT EXISTS TBL_GENERICA(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, TIPO INTEGER, GLOSA TEXT)');
         //Poblamiento tabla generica
         tx.executeSql('INSERT INTO TBL_GENERICA (TIPO, GLOSA) VALUES (0,"TOYOTA"),(0,"NISSAN"),(0,"KIA"),(0,"HYUNDAI"),(0,"AUDI"),(0,"SUBARU"),(1,"ROJO"),(1,"AMARILLO"),(1,"BLANCO"),(1,"NEGRO"),(1,"SILVER"),(1,"AZUL"),(2,"Estacionado cerca de Grifo"),(2,"Estacionado frente a Salida Vehículos"),(2,"Estacionado en lugar restringido"),(2,"Estacionado sobre vereda")');
-         */  
+          
     }
 
     
@@ -85,58 +81,120 @@
     //Para la ventana de ingreso de multas
         
         $(document).on('pagebeforeshow', '#ingreso', function(){ 
-        //Limpiamos todos los valores de la lista    
-        $("#marca").empty();
-        //Abrimos la bd
+            //Limpiamos todos los valores de la lista    
+            $("#marca").empty();
+            //Abrimos la bd
+            var db = window.openDatabase("Database", "1.0", "BDTarea", 200000);
+            db.transaction(function(tx) {
+            //Aca traemos los datos y llamamos a la funcion que dibuja el select de la lista de marcas
+            //tx.executeSql("select glosa from TBL_GENERICA where TIPO=0",[],dibujarListaMarca,errorCB);
+            //para probar nomas, borrar. cambiar la consulta nueva
+            //tx.executeSql("select id, glosa from TablaGlosa",[],dibujarListaMarca,errorCB);
+            //llenado combo marcas
+            tx.executeSql("select GLOSA from TBL_GENERICA WHERE TIPO = 0",[],dibujarListaMarca,errorCB);
+            tx.executeSql("select GLOSA from TBL_GENERICA WHERE TIPO = 1",[],dibujarListaColor,errorCB);
+            tx.executeSql("select GLOSA from TBL_GENERICA WHERE TIPO = 2",[],dibujarListaMulta,errorCB);
+            } , errorCB);
+            
+        });
+
+        //Dibujamos el combo de la marca
+            function dibujarListaMarca(tx,results){
+                        if (results.rows.length == 0) {
+                              $("#marca").append('<option>No hay datos registrados');
+                        } else {
+                    
+                             for(var i=0; i<results.rows.length; i++) {
+                                  var marca=results.rows.item(i).GLOSA;
+                                      var option = $('<option>').attr('value',marca).append(marca);
+                                     $('#marca').append(option);   
+                                }
+                        //Recordar que el refresh sirve para hacer render a la lista, o cualquier elemento
+                        //de jquerymobile que tenga un render con css de jqm.
+                        //$("#listado").listview("refresh");
+                      }
+            }
+            
+        //Dibujamos el combo del Color
+            function dibujarListaColor(tx,results){
+                        if (results.rows.length == 0) {
+                              $("#color").append('<option>No hay datos registrados');
+                        } else {
+                    
+                             for(var i=0; i<results.rows.length; i++) {
+                                  var color=results.rows.item(i).GLOSA;
+                                      var option = $('<option>').attr('value',color).append(color);
+                                     $('#color').append(option);     
+                        }
+                        //Recordar que el refresh sirve para hacer render a la lista, o cualquier elemento
+                        //de jquerymobile que tenga un render con css de jqm.
+                        //$("#listado").listview("refresh");
+                      }
+            }
+
+        //Dibujamos el combo de la Multa
+            function dibujarListaMulta(tx,results){
+                        if (results.rows.length == 0) {
+                              $("#tipo").append('<option>No hay datos registrados');
+                        } else {
+                    
+                             for(var i=0; i<results.rows.length; i++) {
+                                  var multa=results.rows.item(i).GLOSA;
+                                      var option = $('<option>').attr('value',multa).append(multa);
+                                     $('#tipo').append(option);     
+                        }
+                        //Recordar que el refresh sirve para hacer render a la lista, o cualquier elemento
+                        //de jquerymobile que tenga un render con css de jqm.
+                        //$("#listado").listview("refresh");
+                      }
+            }
+
+    //guardar multa
+    function guardarMulta(Marca,Modelo,Patente,Color,Estatal,Direccion,Fecha,Tipo)
+    {
+     var db = window.openDatabase("Database", "1.0", "BDTarea", 200000);
+     db.transaction(
+          function(tx) {        
+                  //Ocupamos consultas parametrizadas para evitar el SQLInyection
+                  tx.executeSql('INSERT INTO TBL_MULTA (MARCA, MODELO, PATENTE, COLOR, ESTATAL, DIRECCION, FECHA_HORA, TIPO_MULTA) VALUES (?,?,?,?,?,?,?,?)',[Marca,Modelo,Patente,Color,Estatal,Direccion,Fecha,Tipo]);
+         }, errorCB,okGuardar);
+    }
+
+    //Para la ventana Con multas registradas
+    $(document).on('pagebeforeshow', '#listado', function(){     
+        $("#lista").empty();
         var db = window.openDatabase("Database", "1.0", "BDTarea", 200000);
         db.transaction(function(tx) {
-        //Aca traemos los datos y llamamos a la funcion que dibuja el select de la lista de marcas
-        //tx.executeSql("select glosa from TBL_GENERICA where TIPO=0",[],dibujarListaMarca,errorCB);
-        //para probar nomas, borrar
-        tx.executeSql("select id, glosa from TablaGlosa",[],dibujarListaMarca,errorCB);
+        //aca podemos hacer filtros, para busquedas, etc
+        tx.executeSql("select id, MARCA, MODELO, PATENTE, COLOR, ESTATAL, DIRECCION, FECHA_HORA, TIPO_MULTA from TBL_MULTA",[],dibujarLista,errorCB);
         } , errorCB);
-        });
-    //Dibujamos el combo de la marca
-    
-    function dibujarListaMarca(tx,results){
-                /*
-                     for(var i=0; i<results.rows.length; i++) 
-                        {
-                              var glosa=results.rows.item(i).glosa;
-                              //var Nombre=results.rows.item(i).Nombre;
-                              //var Dueno=results.rows.item(i).Dueno;
-                              //var Raza=results.rows.item(i).Raza;
-                              //var Vacunado=results.rows.item(i).Vacunado;
-                              //var Peso=results.rows.item(i).Peso;
-                              //Esto es lo que queremos dibujar
-                              //<option value="standard">Standard: 7 day</option>
-                             
-                              //var li = $('<li>').attr('data-id', Id).append($('<h1>').append(Nombre).append(" ").append(Dueno).append(" ").append(Raza).append(" ").append(Vacunado).append(" ").append(Peso));
-                              var option = $('<option>').attr('value',glosa).append(glosa);
-                             $('#marca').append(option); 
-                             
-                        }
-                //Recordar que el refresh sirve para hacer render a la lista, o cualquier elemento
-                //de jquerymobile que tenga un render con css de jqm.
-                //$("#marca").listview("refresh");
-                */
-                if (results.rows.length == 0) {
-                      $("#marca").append('<option>No hay datos registrados');
-                } else {
-            
-                     for(var i=0; i<results.rows.length; i++) {
-                          var glosa=results.rows.item(i).glosa;
-                              var option = $('<option>').attr('value',glosa).append(glosa);
-                             $('#marca').append(option);     
-                }
-                //Recordar que el refresh sirve para hacer render a la lista, o cualquier elemento
-                //de jquerymobile que tenga un render con css de jqm.
-                //$("#listado").listview("refresh");
-              }
+     });
 
-        
-    }
+    //Dibujar lista con las multas
+    function dibujarLista(tx,results){
+        if (results.rows.length == 0) {
+              //$("#mensaje").html("<p>No hay Registros</p>");
+              var li = $('<li>').append("No Hay Multas Ingresadas");
+                $('#lista').append(li);
+        } else {
     
+             for(var i=0; i<results.rows.length; i++) {
+                  //var Id=results.rows.item(i).id;
+                  var Marca=results.rows.item(i).MARCA;
+                  var Modelo=results.rows.item(i).MODELO;
+                  var Patente=results.rows.item(i).PATENTE;
+                  var Fecha=results.rows.item(i).FECHA_HORA;
+                  var Tipo=results.rows.item(i).TIPO_MULTA;
+                  var numero= i+1;
+                 
+                  var li = $('<li>').append($('<h4>').append("Multa ").append(numero).append(" - ").append(Tipo).append('</h4>').append('<br>').append(" ").append(Marca).append(" ").append(Modelo).append(" ").append(Patente).append('</li>'));
+                 $('#lista').append(li);     
+        }
+        //Recordar que el refresh sirve para hacer render a la lista, o cualquier elemento
+        //de jquerymobile que tenga un render con css de jqm.
+        //$("#lista").listview("refresh");
+      }
+    }
 
     $(document).on('ready',function(){
 
@@ -152,18 +210,28 @@
                     $.mobile.changePage("#menu")
                 }
             };
-
         });
-
-        
-        
         //Pop-up confirmar Guardar
         $(document).on('click', '#guardar', function() { 
             $( "#conf_guardar" ).popup( "open" )
         });
-
+        //boton Cancelar Pop-Guardar
         $(document).on('click', '#cancelar_pop_guardar', function() { 
             $( "#conf_guardar" ).popup( "close" )
+        });
+        //boton Guardar Pop-Guardar
+        $(document).on('click', '#guardar_pop', function() { 
+            //$( "#conf_guardar" ).popup( "close" );
+            var Marca =$("#marca").val();
+            var Modelo =$("#modelo").val();
+            var Patente =$("#patente").val();
+            var Color= $("#color").val();
+            var Estatal= $("#vi_est").val();
+            var Direccion= $("#direccion").val();
+            var Fecha= $("#fecha").val();
+            var Tipo= $("#tipo").val();
+            guardarMulta(Marca,Modelo,Patente,Color,Estatal,Direccion,Fecha,Tipo);
+            $.mobile.changePage("#listado")
         });
 
         //Pop-up confirmar Limpiar
@@ -288,7 +356,10 @@
 <!--Pagina con la lista de multas ingresadas-->
 <div data-role="page" id="listado">
     <div data-role="content">   
-        <p>Aca se muestran los datos ingresados</p>      
+        <p><h3>Multas Registradas</h3>
+            <ul data-role="listview" data-count-theme="c" data-inset="true"id="lista">
+            </ul> 
+        </p>    
     </div><!-- /content -->
 </div><!-- /page -->
 <!--Fin Pagina multas ingresadas-->
